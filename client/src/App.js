@@ -4,26 +4,10 @@ import './App.css';
 
 class App extends Component {
   state = {
-    // response: ''
     type: '',
     list: [],
     name: ''
   }
-
-  componentDidMount() {
-    // this.callApi()
-    //   .then(res => this.setState({response: res.express}))
-    //   .catch(err => console.log(err));
-  }
-
-  // fetchData = type => {
-  //   console.log('hello fetchData')
-  //   return axios
-  //     .get(`https://swapi.co/api/${type}`)
-  //     .then(response => {
-  //       this.setState({list: response.data.results})
-  //     })
-  // }
 
   handleChange = e => {
     this.setState({ name: e.target.value })
@@ -31,43 +15,45 @@ class App extends Component {
 
   handleSubmit = async e => {
     e.preventDefault()
-    console.log(e.target)
     const searchResponse = await fetch(`/people/${this.state.name}`)
     const searchList = await searchResponse.json()
-    //this.setState({ name: '' })
+    this.setState({
+      name: '',
+      list: searchList.list,
+      type: 'search results'
+    })
   }
 
-  handleButtonClick = async (type, e) => {
+  handleButtonClick = async type => {
     switch (type) {
     case 'people':
       const peopleResponse = await fetch('/people');
       const peopleList = await peopleResponse.json();
-      this.setState({list: peopleList.list})
+      this.setState({
+        list: peopleList.list,
+        type
+      })
       break
     case 'planets':
       const planetsResponse = await fetch('/planets');
       const planetsList = await planetsResponse.json();
-      this.setState({list: planetsList.list})
+      this.setState({
+        list: planetsList.list,
+        type
+      })
       break
     case 'starships':
       const starshipsResponse = await fetch('/starships');
       const starshipsList = await starshipsResponse.json();
-      this.setState({list: starshipsList.list})
+      this.setState({
+        list: starshipsList.list,
+        type
+      })
       break
     default:
       break
     }
   }
-
-
-  // callApi = async () => {
-  //   const response = await fetch('/api/hello');
-  //   const body = await response.json();
-
-  //   if (response.status !== 200) throw Error(body.message);
-
-  //   return body;
-  // }
 
   render() {
     const list = this.state.list.length ? this.state.list.map(item => {
