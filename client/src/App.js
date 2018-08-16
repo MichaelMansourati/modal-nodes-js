@@ -1,46 +1,61 @@
 import React, { Component } from 'react';
-import axios from 'axios'
+// import axios from 'axios'
 import './App.css';
 
 class App extends Component {
   state = {
-    // response: ''
     type: '',
-    list: []
-  };
-
-  componentDidMount() {
-    // this.callApi()
-    //   .then(res => this.setState({response: res.express}))
-    //   .catch(err => console.log(err));
+    list: [],
+    name: ''
   }
 
-  fetchData = type => {
-    console.log('hello fetchData')
-    return axios
-      .get(`https://swapi.co/api/${type}`)
-      .then(response => {
-        this.setState({list: response.data.results})
+  handleChange = e => {
+    this.setState({ name: e.target.value })
+  }
+
+  handleSubmit = async e => {
+    e.preventDefault()
+    const searchResponse = await fetch(`/people/${this.state.name}`)
+    const searchList = await searchResponse.json()
+    this.setState({
+      name: '',
+      list: searchList.list,
+      type: 'search results'
+    })
+  }
+
+  handleButtonClick = async type => {
+    switch (type) {
+    case 'people':
+      const peopleResponse = await fetch('/people');
+      const peopleList = await peopleResponse.json();
+      this.setState({
+        list: peopleList.list,
+        type
       })
+      break
+    case 'planets':
+      const planetsResponse = await fetch('/planets');
+      const planetsList = await planetsResponse.json();
+      this.setState({
+        list: planetsList.list,
+        type
+      })
+      break
+    case 'starships':
+      const starshipsResponse = await fetch('/starships');
+      const starshipsList = await starshipsResponse.json();
+      this.setState({
+        list: starshipsList.list,
+        type
+      })
+      break
+    default:
+      break
+    }
   }
-
-  handleButtonClick = (type, e) => {
-    this.setState({type});
-    this.fetchData(type)
-  }
-
-
-  // callApi = async () => {
-  //   const response = await fetch('/api/hello');
-  //   const body = await response.json();
-
-  //   if (response.status !== 200) throw Error(body.message);
-
-  //   return body;
-  // }
 
   render() {
-    console.log(this.state)
     const list = this.state.list.length ? this.state.list.map(item => {
       return <li key={item.url} >{item.name}</li>
     })
@@ -61,6 +76,12 @@ class App extends Component {
               Starships
             </button>
           </p>
+          <form onSubmit={this.handleSubmit}>
+            <span>search people: </span>
+            <input type="text" onChange={this.handleChange} value={this.state.name} />
+            <span> </span>
+            <input type="submit" value="search" />
+          </form>
         </header>
         <h3 className="App-intro">
           {this.state.type}
