@@ -1,36 +1,39 @@
 const express = require('express');
-const request = require('request');
 const axios   = require('axios');
 
 const app = express();
 const port = process.env.PORT || 5000;
 
 const fetchData = async type => {
-  let dataArr = []
+  let itemsArr = []
   let pages = null
   await axios
     .get(`https://swapi.co/api/${type}`)
     .then(async response => {
       pages = Math.ceil(response.data.count/10)
       for(let i = 1; i <= pages; i++){
-        await axios
-          .get(`https://swapi.co/api/${type}/?page=${i}`)
-          .then(pageResponse => {
-            pageResponse.data.results.forEach(item => {
-              dataArr.push(item);
-            })
-          })
+        const pageData = await fetchPage(type, i)
+        pageData.results.forEach(item => {
+          itemsArr.push(item)
+        })
       }
     })
-  return dataArr
+    .catch(error => (console.log(error)))
+  return itemsArr
 }
 
-app.get('/', (req, res) => {
-  res.send({ express: 'Hello From Express' });
-});
+const fetchPage = async (type, pageNum) => {
+  return await axios
+    .get(`https://swapi.co/api/${type}/?page=${pageNum}`)
+    .then(res => {
+      return res.data
+    })
+    .catch(error => console.log(error))
+}
 
-app.get('/people/:name', async (req, res) => {
+app.get('/search/:name', async (req, res) => {
   const unfilteredList = await fetchData('people');
+  console.log(unfilteredList[0]);
   const searchString = req.params.name.toLowerCase()
   const filteredList = unfilteredList.filter(item =>
     item.name.toLowerCase().indexOf(searchString) !== -1
@@ -38,20 +41,16 @@ app.get('/people/:name', async (req, res) => {
   res.send({list: filteredList})
 })
 
-app.get('/people', async (req, res) => {
-  const list = await fetchData('people')
-  res.send({list})
+app.get('/people/:pageNum', async (req, res) => {
+  res.send(await fetchPage('people', req.params.pageNum))
 })
 
-
-app.get('/planets', async (req, res) => {
-  const list = await fetchData('planets')
-  res.send({list})
+app.get('/planets/:pageNum', async (req, res) => {
+  res.send(await fetchPage('planets', req.params.pageNum))
 })
 
-app.get('/starships', async (req, res) => {
-  const list = await fetchData('starships')
-  res.send({list})
+app.get('/starships/:pageNum', async (req, res) => {
+  res.send(await fetchPage('starships', req.params.pageNum))
 })
 
 
