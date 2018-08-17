@@ -44,7 +44,7 @@ class App extends Component {
       const planetsData = await planetsResponse.json();
       this.setState({
         list: planetsData.results,
-        pages: Math.ceil(peopleData.count/10),
+        pages: Math.ceil(planetsData.count/10),
         type
       })
       break
