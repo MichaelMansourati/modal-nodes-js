@@ -6,7 +6,9 @@ class App extends Component {
   state = {
     type: '',
     list: [],
-    name: ''
+    name: '',
+    pages: 0,
+    currentPage: 0
   }
 
   handleChange = e => {
@@ -15,38 +17,44 @@ class App extends Component {
 
   handleSubmit = async e => {
     e.preventDefault()
-    const searchResponse = await fetch(`/people/${this.state.name}`)
+    const searchResponse = await fetch(`/search/${this.state.name}`)
     const searchList = await searchResponse.json()
     this.setState({
       name: '',
       list: searchList.list,
-      type: 'search results'
+      type: 'search results',
+      pages: 0
     })
   }
 
-  handleButtonClick = async type => {
+  handleClick = async (type, pageNum, e) => {
+    e.preventDefault()
+    this.setState({ currentPage: pageNum })
     switch (type) {
     case 'people':
-      const peopleResponse = await fetch('/people');
-      const peopleList = await peopleResponse.json();
+      const peopleResponse = await fetch(`/people/${pageNum}`);
+      const peopleData = await peopleResponse.json();
       this.setState({
-        list: peopleList.list,
+        list: peopleData.results,
+        pages: Math.ceil(peopleData.count/10),
         type
       })
       break
     case 'planets':
-      const planetsResponse = await fetch('/planets');
-      const planetsList = await planetsResponse.json();
+      const planetsResponse = await fetch(`/planets/${pageNum}`);
+      const planetsData = await planetsResponse.json();
       this.setState({
-        list: planetsList.list,
+        list: planetsData.results,
+        pages: Math.ceil(planetsData.count/10),
         type
       })
       break
     case 'starships':
-      const starshipsResponse = await fetch('/starships');
-      const starshipsList = await starshipsResponse.json();
+      const starshipsResponse = await fetch(`/starships/${pageNum}`);
+      const starshipsData = await starshipsResponse.json();
       this.setState({
-        list: starshipsList.list,
+        list: starshipsData.results,
+        pages: Math.ceil(starshipsData.count/10),
         type
       })
       break
@@ -60,19 +68,28 @@ class App extends Component {
       return <li key={item.url} >{item.name}</li>
     })
     : ''
+    const pagesArray = []
+    for (let i = 1; i <= this.state.pages; i++) {
+      pagesArray.push(i)
+    }
+
+    const pagesIndex = pagesArray.map(num => {
+      return num === this.state.currentPage ? <span>{num} </span>
+      : <span><a href="#" onClick={(e) => this.handleClick(this.state.type, num, e)}>{num}</a> </span>
+    })
 
     return (
       <div className="App">
         <header className="App-header">
           <h1 className="App-title">Modal Nodes JS</h1>
           <p>
-            <button onClick={(e) => this.handleButtonClick('people', e)}>
+            <button onClick={(e) => this.handleClick('people', 1, e)}>
               People
             </button>
-            <button onClick={(e) => this.handleButtonClick('planets', e)}>
+            <button onClick={(e) => this.handleClick('planets', 1, e)}>
               Planets
             </button>
-            <button onClick={(e) => this.handleButtonClick('starships', e)}>
+            <button onClick={(e) => this.handleClick('starships', 1, e)}>
               Starships
             </button>
           </p>
@@ -89,6 +106,7 @@ class App extends Component {
         <ul style={{listStyle: 'none', padding: 0}}>
           {list}
         </ul>
+        <p>{pagesIndex}</p>
       </div>
     );
   }
