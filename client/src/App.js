@@ -7,7 +7,8 @@ class App extends Component {
     type: '',
     list: [],
     name: '',
-    pages: 0
+    pages: 0,
+    currentPage: 0
   }
 
   handleChange = e => {
