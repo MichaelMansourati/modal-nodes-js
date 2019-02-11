@@ -17,7 +17,7 @@ class App extends Component {
 
   handleSubmit = async e => {
     e.preventDefault()
-    const searchResponse = await fetch(`/search/${this.state.name}`)
+    const searchResponse = await fetch(`/search/${this.state.name}/`)
     const searchList = await searchResponse.json()
     this.setState({
       name: '',
@@ -29,15 +29,20 @@ class App extends Component {
 
   handleClick = async (type, pageNum, e) => {
     e.preventDefault()
-    this.setState({ currentPage: pageNum })
+    this.setState({
+      currentPage: pageNum,
+      loading: true,
+      type
+    })
     switch (type) {
     case 'people':
       const peopleResponse = await fetch(`/people/${pageNum}`);
       const peopleData = await peopleResponse.json();
+      console.log(peopleData);
       this.setState({
         list: peopleData.results,
         pages: Math.ceil(peopleData.count/10),
-        type
+        loading: false
       })
       break
     case 'planets':
@@ -46,7 +51,7 @@ class App extends Component {
       this.setState({
         list: planetsData.results,
         pages: Math.ceil(planetsData.count/10),
-        type
+        loading: false
       })
       break
     case 'starships':
@@ -55,9 +60,17 @@ class App extends Component {
       this.setState({
         list: starshipsData.results,
         pages: Math.ceil(starshipsData.count/10),
-        type
+        loading: false
       })
       break
+    case 'search':
+      const searchResponse = await fetch(`/search/${this.state.name}/${pageNum}`)
+      const searchData = await searchResponse.json();
+      this.setState({
+        list: searchData.list,
+        loading: false,
+        pages: searchData.pages
+      })
     default:
       break
     }
@@ -65,7 +78,7 @@ class App extends Component {
 
   render() {
     const list = this.state.list.length ? this.state.list.map(item => {
-      return <li key={item.url} >{item.name}</li>
+      return <li key={item.url}>{item.name}</li>
     })
     : ''
     const pagesArray = []
@@ -74,8 +87,8 @@ class App extends Component {
     }
 
     const pagesIndex = pagesArray.map(num => {
-      return num === this.state.currentPage ? <span>{num} </span>
-      : <span><a href="#" onClick={(e) => this.handleClick(this.state.type, num, e)}>{num}</a> </span>
+      return num === this.state.currentPage ? <span key={num}>{num} </span>
+      : <span key={num}><a href="" onClick={(e) => this.handleClick(this.state.type, num, e)}>{num}</a> </span>
     })
 
     return (
@@ -93,7 +106,7 @@ class App extends Component {
               Starships
             </button>
           </p>
-          <form onSubmit={this.handleSubmit}>
+          <form onSubmit={(e) => this.handleClick('search', 1, e)}>
             <span>search people: </span>
             <input type="text" onChange={this.handleChange} value={this.state.name} />
             <span> </span>
@@ -103,10 +116,20 @@ class App extends Component {
         <h3 className="App-intro">
           {this.state.type}
         </h3>
-        <ul style={{listStyle: 'none', padding: 0}}>
-          {list}
-        </ul>
-        <p>{pagesIndex}</p>
+        {this.state.loading ?
+          (
+            <p>loading</p>
+          ) : (
+            <React.Fragment>
+              <ul style={{listStyle: 'none', padding: 0}}>
+                {list}
+              </ul>
+              {this.state.pages > 1 &&
+                <p>{pagesIndex}</p>
+              }
+            </React.Fragment>
+          )
+        }
       </div>
     );
   }
