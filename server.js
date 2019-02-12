@@ -7,13 +7,15 @@ const port = process.env.PORT || 5000;
 const fetchData = async (type) => {
   let itemsArr = [];
   const response = await axios(`https://swapi.co/api/${type}`)
-  pages = Math.ceil(response.data.count/10)
+  const pages = Math.ceil(response.data.count/10)
+
   for (let i = 1; i <= pages; i++) {
     const pageData = await fetchPage(type, i);
     pageData.results.forEach(item => {
       itemsArr.push(item)
     })
   }
+
   return itemsArr
 }
 
@@ -23,19 +25,13 @@ const fetchPage = async (type, pageNum) => {
 }
 
 app.get('/search/:name/:pageNum', async (req, res) => {
-  console.log(req.params)
   const data = await fetchData('people');
   const searchString = req.params.name.toLowerCase()
-  const filteredList = data.filter(item =>
-    item.name.toLowerCase().indexOf(searchString) !== -1
-  )
+  const filteredList = data.filter(item => item.name.toLowerCase().indexOf(searchString) !== -1);
   const pages = Math.ceil(filteredList.length/10);
   const startIndex = (req.params.pageNum - 1)*10;
-  const endIndex = startIndex + 10;
 
-
-  const filteredListPage = filteredList.slice(startIndex, endIndex);
-  console.log(pages)
+  const filteredListPage = filteredList.slice(startIndex, startIndex + 10);
   res.send({list: filteredListPage, pages: pages})
 })
 
@@ -50,8 +46,5 @@ app.get('/planets/:pageNum', async (req, res) => {
 app.get('/starships/:pageNum', async (req, res) => {
   res.send(await fetchPage('starships', req.params.pageNum))
 })
-
-
-
 
 app.listen(port, () => console.log(`Listening on port ${port}`));

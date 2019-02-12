@@ -34,32 +34,16 @@ class App extends Component {
       loading: true,
       type
     })
+
     switch (type) {
     case 'people':
-      const peopleResponse = await fetch(`/people/${pageNum}`);
-      const peopleData = await peopleResponse.json();
-      console.log(peopleData);
-      this.setState({
-        list: peopleData.results,
-        pages: Math.ceil(peopleData.count/10),
-        loading: false
-      })
-      break
     case 'planets':
-      const planetsResponse = await fetch(`/planets/${pageNum}`);
-      const planetsData = await planetsResponse.json();
-      this.setState({
-        list: planetsData.results,
-        pages: Math.ceil(planetsData.count/10),
-        loading: false
-      })
-      break
     case 'starships':
-      const starshipsResponse = await fetch(`/starships/${pageNum}`);
-      const starshipsData = await starshipsResponse.json();
+      const response = await fetch(`/${type}/${pageNum}`);
+      const data = await response.json();
       this.setState({
-        list: starshipsData.results,
-        pages: Math.ceil(starshipsData.count/10),
+        list: data.results,
+        pages: Math.ceil(data.count/10),
         loading: false
       })
       break
@@ -71,6 +55,7 @@ class App extends Component {
         loading: false,
         pages: searchData.pages
       })
+      break
     default:
       break
     }
