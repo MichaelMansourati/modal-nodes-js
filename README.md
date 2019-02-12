@@ -4,6 +4,10 @@ Modal Nodes JS is a a small test of an application I made to practice my skills 
 ### TODO
 ---
 - make a better readme
-- paginate results
-- show 'loading...' or similar when loading
-- style
+- paginate results \[completed]
+- show 'loading...' or similar when loading \[completed]
+- restyle
+- add other categories
+- search all categories
+- simple caching of search results when navigating through pages of returned items
+- incorporate into homepage
